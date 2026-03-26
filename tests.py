@@ -2,6 +2,15 @@ import pytest
 from model import Question
 
 
+@pytest.fixture
+def question_with_multiple_choices():
+    question = Question(title="q1", max_selections=3)
+    question.add_choice("a", True)
+    question.add_choice("b", False)
+    question.add_choice("c", True)
+    return question
+
+
 def test_create_question():
     question = Question(title="q1")
     assert question.id != None
@@ -135,3 +144,13 @@ def test_set_correct_choices_and_correct_selected_choices():
     assert not question.choices[1].is_correct
     assert question.choices[2].is_correct
     assert question.correct_selected_choices([1, 2, 3, 999]) == [1, 3]
+
+
+def test_correct_selected_choices_with_fixture(question_with_multiple_choices):
+    correct_selected_choices = question_with_multiple_choices.correct_selected_choices([1, 2, 3])
+    assert correct_selected_choices == [1, 3]
+
+
+def test_correct_selected_choices_exceeds_max_with_fixture(question_with_multiple_choices):
+    with pytest.raises(Exception):
+        question_with_multiple_choices.correct_selected_choices([1, 2, 3, 999])
